@@ -85,7 +85,7 @@ class DQNAgent:
         
         return loss.item()
 
-    def train_agent(self, env, agent, episodes=100, max_steps=1000):
+    def train_agent(self, env, agent, episodes=200, max_steps=1000):
         training_history = []
         
         for episode in range(episodes):
@@ -101,7 +101,6 @@ class DQNAgent:
                 self.store_transition(state, action, reward, next_state, done)
                 self.train()
 
-                
                 # Decay epsilon
                 if step%100 == 0: 
                     self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
@@ -120,7 +119,7 @@ class DQNAgent:
             })
             
             
-            print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward:.2f}, Epsilon: {self.epsilon:.2f}")
+            print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward:.2f}, Epsilon: {self.epsilon:.2f}, Steps: {step}")
         
         return training_history
 
