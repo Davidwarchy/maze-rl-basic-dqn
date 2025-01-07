@@ -69,13 +69,20 @@ class DQNAgent:
         next_states = torch.FloatTensor(next_states).to(self.device)
         dones = torch.FloatTensor(dones).to(self.device)
         
-        # Current Q values
+        # Current Q values - 
+        #   how good model thinks our current actions are
+        #   initially a random guess 
         current_q_values = self.model(states).gather(1, actions.unsqueeze(1))
         
-        # Next Q values
+        # Next Q values 
+        #   how good model thinks the best move for the next position is
         with torch.no_grad():
             next_q_values = self.model(next_states).max(1)[0]
-            target_q_values = rewards + (1 - dones) * self.gamma * next_q_values
+            # This is to be used in the loss function which examines the differences between 
+            #      1. How good our current position is assumed to be (effectively what model thinks are good actions to take) 
+            #      2. What are actually good position (given REWARD) + best score of our next position the model assumes 
+            # We want to reduce the gap between the two elements 
+            target_q_values = rewards + self.gamma * next_q_values
         
         # Compute loss and optimize
         loss = self.criterion(current_q_values.squeeze(), target_q_values)

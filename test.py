@@ -45,7 +45,7 @@ def test_trained_agent(model_path, env, max_steps=50):
         # Update state
         state = next_state
 
-        print(step)
+        print(f'Step: {step} Action: {action}')
         
         if done:
             print(f"Goal reached in {step + 1} steps!")
