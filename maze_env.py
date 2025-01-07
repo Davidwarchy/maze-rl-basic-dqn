@@ -64,7 +64,7 @@ class SimpleMazeEnv(gym.Env):
 
         # Determine reward
         if self.agent_position == self.goal_position:
-            reward = 1.0  # Reward for reaching the goal
+            reward = 200.0  # Reward for reaching the goal
             done = True
         elif self.maze[self.agent_position[0]][self.agent_position[1]] == 1:
             reward = -1.0  # Penalty for hitting a wall

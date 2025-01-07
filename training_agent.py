@@ -30,7 +30,7 @@ class DQNAgent:
         self.gamma = 0.95  # discount factor
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9995
+        self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         
         # Neural Network
@@ -83,44 +83,46 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
         
-        # Decay epsilon
-        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
-        
         return loss.item()
 
-def train_agent(env, agent, episodes=10, max_steps=1000):
-    training_history = []
-    
-    for episode in range(episodes):
-        state = env.reset()
-        total_reward = 0
+    def train_agent(self, env, agent, episodes=100, max_steps=1000):
+        training_history = []
         
-        for step in range(max_steps):
-            # Choose and perform action
-            action = agent.choose_action(state)
-            next_state, reward, done, _ = env.step(action)
+        for episode in range(episodes):
+            state = env.reset()
+            total_reward = 0
             
-            # Store transition and train
-            agent.store_transition(state, action, reward, next_state, done)
-            loss = agent.train()
+            for step in range(max_steps):
+                # Choose and perform action
+                action = self.choose_action(state)
+                next_state, reward, done, _ = env.step(action)
+                
+                # Store transition and train
+                self.store_transition(state, action, reward, next_state, done)
+                self.train()
+
+                
+                # Decay epsilon
+                if step%100 == 0: 
+                    self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+                
+                total_reward += reward
+                state = next_state
+                
+                if done:
+                    break
             
-            print(reward)
-            total_reward += reward
-            state = next_state
+            # Store episode statistics
+            training_history.append({
+                'episode': episode,
+                'total_reward': total_reward,
+                'epsilon': self.epsilon
+            })
             
-            if done:
-                break
+            
+            print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward:.2f}, Epsilon: {self.epsilon:.2f}")
         
-        # Store episode statistics
-        training_history.append({
-            'episode': episode,
-            'total_reward': total_reward,
-            'epsilon': agent.epsilon
-        })
-        
-        print(f"Episode {episode + 1}/{episodes}, Total Reward: {total_reward:.2f}, Epsilon: {agent.epsilon:.2f}")
-    
-    return training_history
+        return training_history
 
 if __name__ == "__main__":
     # Create maze environment
@@ -139,7 +141,7 @@ if __name__ == "__main__":
     agent = DQNAgent(state_size, action_size)
     
     # Train agent
-    history = train_agent(env, agent)
+    history = agent.train_agent(env, agent)
     
     # Save the trained model
     torch.save(agent.model.state_dict(), 'output/dqn_maze_solver.pth')
