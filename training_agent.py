@@ -92,7 +92,7 @@ class DQNAgent:
         
         return loss.item()
 
-    def train_agent(self, env, agent, episodes=200, max_steps=1000):
+    def train_agent(self, env, agent, episodes=300, max_steps=1000):
         training_history = []
         
         for episode in range(episodes):
